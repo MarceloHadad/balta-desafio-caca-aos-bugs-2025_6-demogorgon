@@ -489,6 +489,8 @@ $RECYCLE.BIN/
 *.sqlite
 *.sqlite3
 *.db
+*.db-shm
+*.db-wal
 
 # SQLite temporary and journal files
 *.sqlite-journal
