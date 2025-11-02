@@ -15,6 +15,16 @@ public static class ProductsEndpoints
 
         group.MapGet("/", async ([AsParameters] SearchProductsRequest request, [FromServices] IHandler<SearchProductsRequest, GetProductsResponse> handler) =>
         {
+            if (request.MinPrice.HasValue && request.MaxPrice.HasValue && request.MinPrice.Value > request.MaxPrice.Value)
+            {
+                return Results.BadRequest(new
+                {
+                    error = "Invalid price range: MinPrice cannot be greater than MaxPrice.",
+                    minPrice = request.MinPrice,
+                    maxPrice = request.MaxPrice
+                });
+            }
+
             var response = await handler.HandleAsync(request);
             return Results.Ok(response);
         });

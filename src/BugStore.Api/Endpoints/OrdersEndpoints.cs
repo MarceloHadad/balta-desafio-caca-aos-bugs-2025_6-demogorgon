@@ -15,6 +15,21 @@ public static class OrdersEndpoints
 
         group.MapGet("/", async ([AsParameters] SearchOrdersRequest request, [FromServices] IHandler<SearchOrdersRequest, GetOrdersResponse> handler) =>
         {
+            var invalidProductPriceRange = request.ProductPriceStart.HasValue && request.ProductPriceEnd.HasValue && request.ProductPriceStart.Value > request.ProductPriceEnd.Value;
+            var invalidCreatedAtRange = request.CreatedAtStart.HasValue && request.CreatedAtEnd.HasValue && request.CreatedAtStart.Value > request.CreatedAtEnd.Value;
+            var invalidUpdatedAtRange = request.UpdatedAtStart.HasValue && request.UpdatedAtEnd.HasValue && request.UpdatedAtStart.Value > request.UpdatedAtEnd.Value;
+
+            if (invalidProductPriceRange || invalidCreatedAtRange || invalidUpdatedAtRange)
+            {
+                return Results.BadRequest(new
+                {
+                    error = "Invalid range filter(s). Ensure that Start is less than or equal to End.",
+                    productPrice = invalidProductPriceRange ? new { start = request.ProductPriceStart, end = request.ProductPriceEnd } : null,
+                    createdAt = invalidCreatedAtRange ? new { start = request.CreatedAtStart, end = request.CreatedAtEnd } : null,
+                    updatedAt = invalidUpdatedAtRange ? new { start = request.UpdatedAtStart, end = request.UpdatedAtEnd } : null
+                });
+            }
+
             var response = await handler.HandleAsync(request);
             return Results.Ok(response);
         });
