@@ -1,4 +1,5 @@
 using BugStore.Application.Repositories;
+using BugStore.Application.UseCases.Customers.Search;
 using BugStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,5 +60,32 @@ public class CustomerRepository : ICustomerRepository
         tracked.Email = customer.Email;
         tracked.Phone = customer.Phone;
         tracked.BirthDate = customer.BirthDate;
+    }
+
+    public async Task<IReadOnlyList<Customer>> SearchAsync(SearchCustomersRequest request)
+    {
+        var query = _context.Customers.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            var value = request.Name.Trim().ToLower();
+            query = query.Where(c => EF.Functions.Like(c.Name.ToLower(), $"%{value}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Email))
+        {
+            var value = request.Email.Trim().ToLower();
+            query = query.Where(c => EF.Functions.Like(c.Email.ToLower(), $"%{value}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Phone))
+        {
+            var value = request.Phone.Trim().ToLower();
+            query = query.Where(c => EF.Functions.Like(c.Phone.ToLower(), $"%{value}%"));
+        }
+
+        query = query.OrderBy(c => c.Name);
+
+        return await query.ToListAsync();
     }
 }

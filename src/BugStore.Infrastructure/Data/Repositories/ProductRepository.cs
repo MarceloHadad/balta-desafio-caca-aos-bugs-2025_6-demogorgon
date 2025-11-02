@@ -1,4 +1,5 @@
 using BugStore.Application.Repositories;
+using BugStore.Application.UseCases.Products.Search;
 using BugStore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -61,5 +62,42 @@ public class ProductRepository(AppDbContext context) : IProductRepository
         tracked.Description = product.Description;
         tracked.Slug = product.Slug;
         tracked.Price = product.Price;
+    }
+
+    public async Task<IReadOnlyList<Product>> SearchAsync(SearchProductsRequest request)
+    {
+        var query = _context.Products.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Title))
+        {
+            var value = request.Title.Trim().ToLower();
+            query = query.Where(p => EF.Functions.Like(p.Title.ToLower(), $"%{value}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Description))
+        {
+            var value = request.Description.Trim().ToLower();
+            query = query.Where(p => EF.Functions.Like(p.Description.ToLower(), $"%{value}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Slug))
+        {
+            var value = request.Slug.Trim().ToLower();
+            query = query.Where(p => EF.Functions.Like(p.Slug.ToLower(), $"%{value}%"));
+        }
+
+        if (request.MinPrice.HasValue)
+        {
+            query = query.Where(p => p.Price >= request.MinPrice.Value);
+        }
+
+        if (request.MaxPrice.HasValue)
+        {
+            query = query.Where(p => p.Price <= request.MaxPrice.Value);
+        }
+
+        query = query.OrderBy(p => p.Title);
+
+        return await query.ToListAsync();
     }
 }
