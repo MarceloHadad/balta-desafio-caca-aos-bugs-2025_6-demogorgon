@@ -16,16 +16,7 @@ public class GetProductsHandler : IHandler<SearchProductsRequest, GetProductsRes
 
     public async Task<GetProductsResponse> HandleAsync(SearchProductsRequest request)
     {
-        var hasFilters =
-            !string.IsNullOrWhiteSpace(request.Title) ||
-            !string.IsNullOrWhiteSpace(request.Description) ||
-            !string.IsNullOrWhiteSpace(request.Slug) ||
-            request.MinPrice.HasValue ||
-            request.MaxPrice.HasValue;
-
-        var items = hasFilters
-            ? await _products.SearchAsync(request)
-            : await _products.GetAllAsync();
+        var items = await _products.SearchAsync(request);
 
         return new GetProductsResponse
         {

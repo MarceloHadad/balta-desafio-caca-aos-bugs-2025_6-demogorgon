@@ -1,3 +1,4 @@
+using BugStore.Application.UseCases.Products.Search;
 using BugStore.Domain.Entities;
 using BugStore.Infrastructure.Data;
 using BugStore.Infrastructure.Data.Repositories;
@@ -154,7 +155,7 @@ public class ProductRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenProductsExist_ReturnsOrderedByTitle()
+    public async Task SearchAsync_WhenNoFilters_ReturnsAllOrderedByTitle()
     {
         // Arrange
         var context = CreateInMemoryContext();
@@ -169,7 +170,7 @@ public class ProductRepositoryTests
         await context.SaveChangesAsync();
 
         // Act
-        var result = await repository.GetAllAsync();
+        var result = await repository.SearchAsync(new SearchProductsRequest());
 
         // Assert
         result.Should().HaveCount(3);
@@ -179,14 +180,14 @@ public class ProductRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenNoProducts_ReturnsEmptyList()
+    public async Task SearchAsync_WhenNoFiltersAndNoProducts_ReturnsEmptyList()
     {
         // Arrange
         var context = CreateInMemoryContext();
         var repository = new ProductRepository(context);
 
         // Act
-        var result = await repository.GetAllAsync();
+        var result = await repository.SearchAsync(new SearchProductsRequest());
 
         // Assert
         result.Should().BeEmpty();

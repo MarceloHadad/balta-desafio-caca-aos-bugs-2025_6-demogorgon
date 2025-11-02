@@ -16,24 +16,7 @@ public class GetOrdersHandler : IHandler<SearchOrdersRequest, GetOrdersResponse>
 
     public async Task<GetOrdersResponse> HandleAsync(SearchOrdersRequest request)
     {
-        var hasFilters =
-            request.Id.HasValue ||
-            !string.IsNullOrWhiteSpace(request.CustomerName) ||
-            !string.IsNullOrWhiteSpace(request.CustomerEmail) ||
-            !string.IsNullOrWhiteSpace(request.CustomerPhone) ||
-            !string.IsNullOrWhiteSpace(request.ProductTitle) ||
-            !string.IsNullOrWhiteSpace(request.ProductDescription) ||
-            !string.IsNullOrWhiteSpace(request.ProductSlug) ||
-            request.ProductPriceStart.HasValue ||
-            request.ProductPriceEnd.HasValue ||
-            request.CreatedAtStart.HasValue ||
-            request.CreatedAtEnd.HasValue ||
-            request.UpdatedAtStart.HasValue ||
-            request.UpdatedAtEnd.HasValue;
-
-        var orders = hasFilters
-            ? await _repository.SearchAsync(request)
-            : await _repository.GetAllWithDetailsAsync();
+        var orders = await _repository.SearchAsync(request);
 
         var items = orders.Select(o => new GetByIdOrderResponse
         {

@@ -29,14 +29,6 @@ public class CustomerRepository : ICustomerRepository
         _context.Customers.Remove(entity);
     }
 
-    public async Task<IReadOnlyList<Customer>> GetAllAsync()
-    {
-        return await _context.Customers
-            .AsNoTracking()
-            .OrderBy(c => c.Name)
-            .ToListAsync();
-    }
-
     public async Task<Customer?> GetByEmailAsync(string email)
     {
         return await _context.Customers

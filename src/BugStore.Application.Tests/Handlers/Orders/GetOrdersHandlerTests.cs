@@ -63,7 +63,7 @@ public class GetOrdersHandlerTests
             }
         };
 
-        _repo.Setup(r => r.GetAllWithDetailsAsync())
+        _repo.Setup(r => r.SearchAsync(It.IsAny<SearchOrdersRequest>()))
             .ReturnsAsync(orders);
 
         // Act
@@ -77,7 +77,7 @@ public class GetOrdersHandlerTests
         response.Orders[0].TotalAmount.Should().Be(200.00m);
         response.Orders[0].Lines.Should().HaveCount(1);
 
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Once);
+        _repo.Verify(r => r.SearchAsync(It.IsAny<SearchOrdersRequest>()), Times.Once);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class GetOrdersHandlerTests
         // Arrange
         var request = new SearchOrdersRequest();
 
-        _repo.Setup(r => r.GetAllWithDetailsAsync())
+        _repo.Setup(r => r.SearchAsync(It.IsAny<SearchOrdersRequest>()))
             .ReturnsAsync(new List<Order>());
 
         // Act
@@ -96,7 +96,7 @@ public class GetOrdersHandlerTests
         response.Should().NotBeNull();
         response.Orders.Should().BeEmpty();
 
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Once);
+        _repo.Verify(r => r.SearchAsync(It.IsAny<SearchOrdersRequest>()), Times.Once);
     }
 
     [Fact]
@@ -156,7 +156,6 @@ public class GetOrdersHandlerTests
         response.Orders[0].Id.Should().Be(orderId);
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req => req.Id == orderId)), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -215,7 +214,6 @@ public class GetOrdersHandlerTests
         response.Orders[0].CustomerName.Should().Contain("John");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req => req.CustomerName == "John")), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -273,7 +271,6 @@ public class GetOrdersHandlerTests
         response.Orders.Should().HaveCount(1);
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req => req.CustomerEmail == "john@")), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -332,7 +329,6 @@ public class GetOrdersHandlerTests
         response.Orders[0].Lines[0].ProductTitle.Should().Contain("Laptop");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req => req.ProductTitle == "Laptop")), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -390,7 +386,6 @@ public class GetOrdersHandlerTests
         response.Orders.Should().HaveCount(1);
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req => req.ProductDescription == "High-end")), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -450,7 +445,6 @@ public class GetOrdersHandlerTests
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req =>
             req.ProductPriceStart == 100.00m && req.ProductPriceEnd == 500.00m)), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -512,7 +506,6 @@ public class GetOrdersHandlerTests
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req =>
             req.CreatedAtStart == startDate && req.CreatedAtEnd == endDate)), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -574,7 +567,6 @@ public class GetOrdersHandlerTests
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchOrdersRequest>(req =>
             req.UpdatedAtStart == startDate && req.UpdatedAtEnd == endDate)), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -642,7 +634,6 @@ public class GetOrdersHandlerTests
             req.ProductTitle == "Laptop" &&
             req.ProductPriceStart == 1000.00m &&
             req.CreatedAtStart == new DateTime(2025, 1, 1))), Times.Once);
-        _repo.Verify(r => r.GetAllWithDetailsAsync(), Times.Never);
     }
 
     [Fact]
@@ -724,7 +715,7 @@ public class GetOrdersHandlerTests
             }
         };
 
-        _repo.Setup(r => r.GetAllWithDetailsAsync())
+        _repo.Setup(r => r.SearchAsync(It.IsAny<SearchOrdersRequest>()))
             .ReturnsAsync(orders);
 
         // Act
@@ -737,3 +728,5 @@ public class GetOrdersHandlerTests
         response.Orders[0].Lines.Should().HaveCount(2);
     }
 }
+
+

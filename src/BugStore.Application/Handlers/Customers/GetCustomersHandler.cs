@@ -16,14 +16,7 @@ public class GetCustomersHandler : IHandler<SearchCustomersRequest, GetCustomers
 
     public async Task<GetCustomersResponse> HandleAsync(SearchCustomersRequest request)
     {
-        var hasFilters =
-            !string.IsNullOrWhiteSpace(request.Name) ||
-            !string.IsNullOrWhiteSpace(request.Email) ||
-            !string.IsNullOrWhiteSpace(request.Phone);
-
-        var customers = hasFilters
-            ? await _repository.SearchAsync(request)
-            : await _repository.GetAllAsync();
+        var customers = await _repository.SearchAsync(request);
 
         var items = customers.Select(c => new GetByIdCustomerResponse
         {

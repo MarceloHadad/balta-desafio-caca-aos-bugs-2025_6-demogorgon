@@ -44,7 +44,7 @@ public class GetProductsHandlerTests
             }
         };
 
-        _repo.Setup(r => r.GetAllAsync())
+        _repo.Setup(r => r.SearchAsync(It.IsAny<SearchProductsRequest>()))
             .ReturnsAsync(products);
 
         // Act
@@ -58,7 +58,7 @@ public class GetProductsHandlerTests
         response.Products[1].Id.Should().Be(products[1].Id);
         response.Products[1].Title.Should().Be(products[1].Title);
 
-        _repo.Verify(r => r.GetAllAsync(), Times.Once);
+        _repo.Verify(r => r.SearchAsync(It.IsAny<SearchProductsRequest>()), Times.Once);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class GetProductsHandlerTests
         // Arrange
         var request = new SearchProductsRequest();
 
-        _repo.Setup(r => r.GetAllAsync())
+        _repo.Setup(r => r.SearchAsync(It.IsAny<SearchProductsRequest>()))
             .ReturnsAsync(new List<Product>());
 
         // Act
@@ -77,7 +77,7 @@ public class GetProductsHandlerTests
         response.Should().NotBeNull();
         response.Products.Should().BeEmpty();
 
-        _repo.Verify(r => r.GetAllAsync(), Times.Once);
+        _repo.Verify(r => r.SearchAsync(It.IsAny<SearchProductsRequest>()), Times.Once);
     }
 
     [Fact]
@@ -109,7 +109,6 @@ public class GetProductsHandlerTests
         response.Products[0].Title.Should().Contain("Laptop");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchProductsRequest>(req => req.Title == "Laptop")), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -141,7 +140,6 @@ public class GetProductsHandlerTests
         response.Products[0].Description.Should().Contain("gaming");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchProductsRequest>(req => req.Description == "gaming")), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -173,7 +171,6 @@ public class GetProductsHandlerTests
         response.Products[0].Slug.Should().Contain("laptop");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchProductsRequest>(req => req.Slug == "laptop")), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -205,7 +202,6 @@ public class GetProductsHandlerTests
         response.Products[0].Price.Should().BeGreaterThanOrEqualTo(100.00m);
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchProductsRequest>(req => req.MinPrice == 100.00m)), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -237,7 +233,6 @@ public class GetProductsHandlerTests
         response.Products[0].Price.Should().BeLessThanOrEqualTo(500.00m);
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchProductsRequest>(req => req.MaxPrice == 500.00m)), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -278,7 +273,6 @@ public class GetProductsHandlerTests
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchProductsRequest>(req =>
             req.MinPrice == 100.00m && req.MaxPrice == 500.00m)), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -319,7 +313,6 @@ public class GetProductsHandlerTests
             req.Description == "professional" &&
             req.MinPrice == 100.00m &&
             req.MaxPrice == 500.00m)), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -341,3 +334,4 @@ public class GetProductsHandlerTests
         _repo.Verify(r => r.SearchAsync(It.IsAny<SearchProductsRequest>()), Times.Once);
     }
 }
+

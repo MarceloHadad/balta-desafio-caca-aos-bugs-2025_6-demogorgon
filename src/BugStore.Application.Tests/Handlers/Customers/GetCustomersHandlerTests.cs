@@ -44,7 +44,7 @@ public class GetCustomersHandlerTests
             }
         };
 
-        _repo.Setup(r => r.GetAllAsync())
+        _repo.Setup(r => r.SearchAsync(It.IsAny<SearchCustomersRequest>()))
             .ReturnsAsync(customers);
 
         // Act
@@ -58,7 +58,7 @@ public class GetCustomersHandlerTests
         response.Customers[1].Id.Should().Be(customers[1].Id);
         response.Customers[1].Name.Should().Be(customers[1].Name);
 
-        _repo.Verify(r => r.GetAllAsync(), Times.Once);
+        _repo.Verify(r => r.SearchAsync(It.IsAny<SearchCustomersRequest>()), Times.Once);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class GetCustomersHandlerTests
         // Arrange
         var request = new SearchCustomersRequest();
 
-        _repo.Setup(r => r.GetAllAsync())
+        _repo.Setup(r => r.SearchAsync(It.IsAny<SearchCustomersRequest>()))
             .ReturnsAsync(new List<Customer>());
 
         // Act
@@ -77,7 +77,7 @@ public class GetCustomersHandlerTests
         response.Should().NotBeNull();
         response.Customers.Should().BeEmpty();
 
-        _repo.Verify(r => r.GetAllAsync(), Times.Once);
+        _repo.Verify(r => r.SearchAsync(It.IsAny<SearchCustomersRequest>()), Times.Once);
     }
 
     [Fact]
@@ -109,7 +109,6 @@ public class GetCustomersHandlerTests
         response.Customers[0].Name.Should().Be("Jane Doe");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchCustomersRequest>(req => req.Name == "Jane")), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -141,7 +140,6 @@ public class GetCustomersHandlerTests
         response.Customers[0].Email.Should().Contain("john");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchCustomersRequest>(req => req.Email == "john@")), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -173,7 +171,6 @@ public class GetCustomersHandlerTests
         response.Customers[0].Phone.Should().Contain("99999");
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchCustomersRequest>(req => req.Phone == "99999")), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -210,7 +207,6 @@ public class GetCustomersHandlerTests
 
         _repo.Verify(r => r.SearchAsync(It.Is<SearchCustomersRequest>(req =>
             req.Name == "Jane" && req.Email == "jane@" && req.Phone == "99999")), Times.Once);
-        _repo.Verify(r => r.GetAllAsync(), Times.Never);
     }
 
     [Fact]
@@ -232,3 +228,4 @@ public class GetCustomersHandlerTests
         _repo.Verify(r => r.SearchAsync(It.IsAny<SearchCustomersRequest>()), Times.Once);
     }
 }
+

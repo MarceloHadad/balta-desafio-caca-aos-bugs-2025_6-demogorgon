@@ -22,14 +22,6 @@ public class ProductRepository(AppDbContext context) : IProductRepository
         _context.Products.Remove(entity);
     }
 
-    public async Task<IReadOnlyList<Product>> GetAllAsync()
-    {
-        return await _context.Products
-            .AsNoTracking()
-            .OrderBy(p => p.Title)
-            .ToListAsync();
-    }
-
     public async Task<IReadOnlyList<Product>> GetByIdsAsync(IEnumerable<Guid> ids)
     {
         var idList = ids.Distinct().ToList();

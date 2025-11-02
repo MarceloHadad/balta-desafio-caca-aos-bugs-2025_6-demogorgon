@@ -9,16 +9,6 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<List<Order>> GetAllWithDetailsAsync()
-    {
-        return await _context.Orders
-            .AsNoTracking()
-            .Include(o => o.Customer)
-            .Include(o => o.Lines)
-                .ThenInclude(l => l.Product)
-            .ToListAsync();
-    }
-
     public async Task<Order?> GetByIdWithDetailsAsync(Guid id)
     {
         return await _context.Orders

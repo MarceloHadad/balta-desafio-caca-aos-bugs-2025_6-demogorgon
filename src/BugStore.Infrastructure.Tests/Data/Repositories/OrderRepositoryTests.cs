@@ -1,3 +1,4 @@
+using BugStore.Application.UseCases.Orders.Search;
 using BugStore.Domain.Entities;
 using BugStore.Infrastructure.Data;
 using BugStore.Infrastructure.Data.Repositories;
@@ -119,7 +120,7 @@ public class OrderRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllWithDetailsAsync_WhenOrdersExist_ReturnsAllOrdersWithDetails()
+    public async Task SearchAsync_WhenNoFilters_ReturnsAllOrdersWithDetails()
     {
         // Arrange
         var context = CreateInMemoryContext();
@@ -138,7 +139,7 @@ public class OrderRepositoryTests
         await context.SaveChangesAsync();
 
         // Act
-        var result = await repository.GetAllWithDetailsAsync();
+        var result = await repository.SearchAsync(new SearchOrdersRequest());
 
         // Assert
         result.Should().HaveCount(2);
@@ -148,14 +149,14 @@ public class OrderRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllWithDetailsAsync_WhenNoOrders_ReturnsEmptyList()
+    public async Task SearchAsync_WhenNoFiltersAndNoOrders_ReturnsEmptyList()
     {
         // Arrange
         var context = CreateInMemoryContext();
         var repository = new OrderRepository(context);
 
         // Act
-        var result = await repository.GetAllWithDetailsAsync();
+        var result = await repository.SearchAsync(new SearchOrdersRequest());
 
         // Assert
         result.Should().BeEmpty();

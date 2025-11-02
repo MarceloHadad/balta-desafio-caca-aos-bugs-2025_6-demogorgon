@@ -1,4 +1,5 @@
 using BugStore.Application.Repositories;
+using BugStore.Application.UseCases.Customers.Search;
 using BugStore.Domain.Entities;
 using BugStore.Infrastructure.Data;
 using BugStore.Infrastructure.Data.Repositories;
@@ -117,7 +118,7 @@ public class CustomerRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenCustomersExist_ReturnsOrderedList()
+    public async Task SearchAsync_WhenNoFilters_ReturnsAllOrderedList()
     {
         // Arrange
         var context = CreateInMemoryContext();
@@ -132,7 +133,7 @@ public class CustomerRepositoryTests
         await context.SaveChangesAsync();
 
         // Act
-        var result = await repository.GetAllAsync();
+        var result = await repository.SearchAsync(new SearchCustomersRequest());
 
         // Assert
         result.Should().HaveCount(3);
@@ -142,14 +143,14 @@ public class CustomerRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllAsync_WhenNoCustomers_ReturnsEmptyList()
+    public async Task SearchAsync_WhenNoFiltersAndNoCustomers_ReturnsEmptyList()
     {
         // Arrange
         var context = CreateInMemoryContext();
         var repository = new CustomerRepository(context);
 
         // Act
-        var result = await repository.GetAllAsync();
+        var result = await repository.SearchAsync(new SearchCustomersRequest());
 
         // Assert
         result.Should().BeEmpty();
