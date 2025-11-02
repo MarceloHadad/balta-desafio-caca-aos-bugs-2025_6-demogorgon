@@ -1,6 +1,7 @@
 using BugStore.Application.Interfaces;
 using BugStore.Application.Requests.Products;
 using BugStore.Application.Responses.Products;
+using BugStore.Application.UseCases.Products.Search;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BugStore.Api.Endpoints;
@@ -12,9 +13,8 @@ public static class ProductsEndpoints
         var group = app.MapGroup("/v1/products")
             .WithTags("Products");
 
-        group.MapGet("/", async ([FromServices] IHandler<GetProductsRequest, GetProductsResponse> handler) =>
+        group.MapGet("/", async ([AsParameters] SearchProductsRequest request, [FromServices] IHandler<SearchProductsRequest, GetProductsResponse> handler) =>
         {
-            var request = new GetProductsRequest();
             var response = await handler.HandleAsync(request);
             return Results.Ok(response);
         });

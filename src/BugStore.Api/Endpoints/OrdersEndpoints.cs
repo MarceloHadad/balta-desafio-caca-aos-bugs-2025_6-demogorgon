@@ -1,6 +1,7 @@
 using BugStore.Application.Interfaces;
 using BugStore.Application.Requests.Orders;
 using BugStore.Application.Responses.Orders;
+using BugStore.Application.UseCases.Orders.Search;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BugStore.Api.Endpoints;
@@ -11,6 +12,12 @@ public static class OrdersEndpoints
     {
         var group = app.MapGroup("/v1/orders")
             .WithTags("Orders");
+
+        group.MapGet("/", async ([AsParameters] SearchOrdersRequest request, [FromServices] IHandler<SearchOrdersRequest, GetOrdersResponse> handler) =>
+        {
+            var response = await handler.HandleAsync(request);
+            return Results.Ok(response);
+        });
 
         group.MapGet("/{id}", async (Guid id, [FromServices] IHandler<GetByIdOrderRequest, GetByIdOrderResponse> handler) =>
         {

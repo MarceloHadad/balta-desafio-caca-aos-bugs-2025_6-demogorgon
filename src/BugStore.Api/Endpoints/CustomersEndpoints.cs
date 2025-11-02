@@ -1,6 +1,7 @@
 using BugStore.Application.Interfaces;
 using BugStore.Application.Requests.Customers;
 using BugStore.Application.Responses.Customers;
+using BugStore.Application.UseCases.Customers.Search;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BugStore.Api.Endpoints;
@@ -12,9 +13,8 @@ public static class CustomersEndpoints
         var group = app.MapGroup("/v1/customers")
             .WithTags("Customers");
 
-        group.MapGet("/", async ([FromServices] IHandler<GetCustomersRequest, GetCustomersResponse> handler) =>
+        group.MapGet("/", async ([AsParameters] SearchCustomersRequest request, [FromServices] IHandler<SearchCustomersRequest, GetCustomersResponse> handler) =>
         {
-            var request = new GetCustomersRequest();
             var response = await handler.HandleAsync(request);
             return Results.Ok(response);
         });

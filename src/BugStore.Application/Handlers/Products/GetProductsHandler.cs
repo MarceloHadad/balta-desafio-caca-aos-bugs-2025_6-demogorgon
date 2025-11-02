@@ -1,11 +1,11 @@
 using BugStore.Application.Interfaces;
 using BugStore.Application.Repositories;
-using BugStore.Application.Requests.Products;
 using BugStore.Application.Responses.Products;
+using BugStore.Application.UseCases.Products.Search;
 
 namespace BugStore.Application.Handlers.Products;
 
-public class GetProductsHandler : IHandler<GetProductsRequest, GetProductsResponse>
+public class GetProductsHandler : IHandler<SearchProductsRequest, GetProductsResponse>
 {
     private readonly IProductRepository _products;
 
@@ -14,9 +14,19 @@ public class GetProductsHandler : IHandler<GetProductsRequest, GetProductsRespon
         _products = products;
     }
 
-    public async Task<GetProductsResponse> HandleAsync(GetProductsRequest request)
+    public async Task<GetProductsResponse> HandleAsync(SearchProductsRequest request)
     {
-        var items = await _products.GetAllAsync();
+        var hasFilters =
+            !string.IsNullOrWhiteSpace(request.Title) ||
+            !string.IsNullOrWhiteSpace(request.Description) ||
+            !string.IsNullOrWhiteSpace(request.Slug) ||
+            request.MinPrice.HasValue ||
+            request.MaxPrice.HasValue;
+
+        var items = hasFilters
+            ? await _products.SearchAsync(request)
+            : await _products.GetAllAsync();
+
         return new GetProductsResponse
         {
             Products = items.Select(p => new GetByIdProductResponse

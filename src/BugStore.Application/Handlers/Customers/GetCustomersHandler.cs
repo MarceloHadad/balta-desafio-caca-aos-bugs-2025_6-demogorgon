@@ -1,11 +1,11 @@
 using BugStore.Application.Interfaces;
 using BugStore.Application.Repositories;
-using BugStore.Application.Requests.Customers;
 using BugStore.Application.Responses.Customers;
+using BugStore.Application.UseCases.Customers.Search;
 
 namespace BugStore.Application.Handlers.Customers;
 
-public class GetCustomersHandler : IHandler<GetCustomersRequest, GetCustomersResponse>
+public class GetCustomersHandler : IHandler<SearchCustomersRequest, GetCustomersResponse>
 {
     private readonly ICustomerRepository _repository;
 
@@ -14,9 +14,16 @@ public class GetCustomersHandler : IHandler<GetCustomersRequest, GetCustomersRes
         _repository = repository;
     }
 
-    public async Task<GetCustomersResponse> HandleAsync(GetCustomersRequest request)
+    public async Task<GetCustomersResponse> HandleAsync(SearchCustomersRequest request)
     {
-        var customers = await _repository.GetAllAsync();
+        var hasFilters =
+            !string.IsNullOrWhiteSpace(request.Name) ||
+            !string.IsNullOrWhiteSpace(request.Email) ||
+            !string.IsNullOrWhiteSpace(request.Phone);
+
+        var customers = hasFilters
+            ? await _repository.SearchAsync(request)
+            : await _repository.GetAllAsync();
 
         var items = customers.Select(c => new GetByIdCustomerResponse
         {
