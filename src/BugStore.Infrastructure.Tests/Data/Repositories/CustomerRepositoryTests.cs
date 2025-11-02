@@ -257,4 +257,176 @@ public class CustomerRepositoryTests
         await act.Should().ThrowAsync<KeyNotFoundException>()
             .WithMessage("Customer not found");
     }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByName_ReturnsMatchingCustomers()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new CustomerRepository(context);
+        var customers = new[]
+        {
+            new Customer { Id = Guid.NewGuid(), Name = "John Doe", Email = "john@example.com", Phone = "+1 555-0001", BirthDate = new DateTime(1990, 1, 1) },
+            new Customer { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane@example.com", Phone = "+1 555-0002", BirthDate = new DateTime(1985, 2, 2) },
+            new Customer { Id = Guid.NewGuid(), Name = "Bob Johnson", Email = "bob@example.com", Phone = "+1 555-0003", BirthDate = new DateTime(1992, 3, 3) }
+        };
+        context.Customers.AddRange(customers);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Customers.Search.SearchCustomersRequest
+        {
+            Name = "john"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(c => c.Name == "John Doe");
+        result.Should().Contain(c => c.Name == "Bob Johnson");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByEmail_ReturnsMatchingCustomers()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new CustomerRepository(context);
+        var customers = new[]
+        {
+            new Customer { Id = Guid.NewGuid(), Name = "John Doe", Email = "john@example.com", Phone = "+1 555-0001", BirthDate = new DateTime(1990, 1, 1) },
+            new Customer { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane@test.com", Phone = "+1 555-0002", BirthDate = new DateTime(1985, 2, 2) },
+            new Customer { Id = Guid.NewGuid(), Name = "Bob Johnson", Email = "bob@example.com", Phone = "+1 555-0003", BirthDate = new DateTime(1992, 3, 3) }
+        };
+        context.Customers.AddRange(customers);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Customers.Search.SearchCustomersRequest
+        {
+            Email = "example"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(c => c.Email == "john@example.com");
+        result.Should().Contain(c => c.Email == "bob@example.com");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByPhone_ReturnsMatchingCustomers()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new CustomerRepository(context);
+        var customers = new[]
+        {
+            new Customer { Id = Guid.NewGuid(), Name = "John Doe", Email = "john@example.com", Phone = "+55 11 99999-0001", BirthDate = new DateTime(1990, 1, 1) },
+            new Customer { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane@example.com", Phone = "+1 555-0002", BirthDate = new DateTime(1985, 2, 2) },
+            new Customer { Id = Guid.NewGuid(), Name = "Bob Johnson", Email = "bob@example.com", Phone = "+55 11 99999-0003", BirthDate = new DateTime(1992, 3, 3) }
+        };
+        context.Customers.AddRange(customers);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Customers.Search.SearchCustomersRequest
+        {
+            Phone = "+55 11"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(c => c.Phone == "+55 11 99999-0001");
+        result.Should().Contain(c => c.Phone == "+55 11 99999-0003");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenMultipleFilters_ReturnsMatchingCustomers()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new CustomerRepository(context);
+        var customers = new[]
+        {
+            new Customer { Id = Guid.NewGuid(), Name = "John Doe", Email = "john@example.com", Phone = "+55 11 99999-0001", BirthDate = new DateTime(1990, 1, 1) },
+            new Customer { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane@example.com", Phone = "+1 555-0002", BirthDate = new DateTime(1985, 2, 2) },
+            new Customer { Id = Guid.NewGuid(), Name = "Bob Johnson", Email = "bob@test.com", Phone = "+55 11 99999-0003", BirthDate = new DateTime(1992, 3, 3) }
+        };
+        context.Customers.AddRange(customers);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Customers.Search.SearchCustomersRequest
+        {
+            Name = "john",
+            Email = "example"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Name.Should().Be("John Doe");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenNoMatches_ReturnsEmptyList()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new CustomerRepository(context);
+        var customers = new[]
+        {
+            new Customer { Id = Guid.NewGuid(), Name = "John Doe", Email = "john@example.com", Phone = "+1 555-0001", BirthDate = new DateTime(1990, 1, 1) },
+            new Customer { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane@example.com", Phone = "+1 555-0002", BirthDate = new DateTime(1985, 2, 2) }
+        };
+        context.Customers.AddRange(customers);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Customers.Search.SearchCustomersRequest
+        {
+            Name = "NonExistent"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SearchAsync_ReturnsOrderedByName()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new CustomerRepository(context);
+        var customers = new[]
+        {
+            new Customer { Id = Guid.NewGuid(), Name = "Zoe Adams", Email = "zoe@example.com", Phone = "+1 555-0001", BirthDate = new DateTime(1995, 1, 1) },
+            new Customer { Id = Guid.NewGuid(), Name = "Alice Brown", Email = "alice@example.com", Phone = "+1 555-0002", BirthDate = new DateTime(1992, 2, 2) },
+            new Customer { Id = Guid.NewGuid(), Name = "Mike Carter", Email = "mike@example.com", Phone = "+1 555-0003", BirthDate = new DateTime(1987, 3, 3) }
+        };
+        context.Customers.AddRange(customers);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Customers.Search.SearchCustomersRequest
+        {
+            Email = "example"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(3);
+        result[0].Name.Should().Be("Alice Brown");
+        result[1].Name.Should().Be("Mike Carter");
+        result[2].Name.Should().Be("Zoe Adams");
+    }
 }

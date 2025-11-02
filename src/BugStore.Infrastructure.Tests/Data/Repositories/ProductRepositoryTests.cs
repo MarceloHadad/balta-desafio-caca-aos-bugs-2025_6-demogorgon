@@ -294,4 +294,266 @@ public class ProductRepositoryTests
         await act.Should().ThrowAsync<KeyNotFoundException>()
             .WithMessage("Product not found");
     }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByTitle_ReturnsMatchingProducts()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Gaming Laptop", Description = "High-end laptop", Slug = "gaming-laptop", Price = 2500m },
+            new Product { Id = Guid.NewGuid(), Title = "Office Mouse", Description = "Standard mouse", Slug = "office-mouse", Price = 50m },
+            new Product { Id = Guid.NewGuid(), Title = "Gaming Mouse", Description = "RGB mouse", Slug = "gaming-mouse", Price = 150m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            Title = "gaming"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(p => p.Title == "Gaming Laptop");
+        result.Should().Contain(p => p.Title == "Gaming Mouse");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByDescription_ReturnsMatchingProducts()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Product 1", Description = "High-end equipment", Slug = "product-1", Price = 1000m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 2", Description = "Budget friendly", Slug = "product-2", Price = 100m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 3", Description = "High-end performance", Slug = "product-3", Price = 2000m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            Description = "high-end"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(p => p.Description == "High-end equipment");
+        result.Should().Contain(p => p.Description == "High-end performance");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterBySlug_ReturnsMatchingProducts()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Product 1", Description = "Desc 1", Slug = "laptop-gaming", Price = 1000m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 2", Description = "Desc 2", Slug = "mouse-wireless", Price = 100m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 3", Description = "Desc 3", Slug = "laptop-office", Price = 800m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            Slug = "laptop"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(p => p.Slug == "laptop-gaming");
+        result.Should().Contain(p => p.Slug == "laptop-office");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByMinPrice_ReturnsMatchingProducts()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Cheap Product", Description = "Desc", Slug = "cheap", Price = 50m },
+            new Product { Id = Guid.NewGuid(), Title = "Mid Product", Description = "Desc", Slug = "mid", Price = 500m },
+            new Product { Id = Guid.NewGuid(), Title = "Expensive Product", Description = "Desc", Slug = "expensive", Price = 2000m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            MinPrice = 500m
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(p => p.Price == 500m);
+        result.Should().Contain(p => p.Price == 2000m);
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByMaxPrice_ReturnsMatchingProducts()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Cheap Product", Description = "Desc", Slug = "cheap", Price = 50m },
+            new Product { Id = Guid.NewGuid(), Title = "Mid Product", Description = "Desc", Slug = "mid", Price = 500m },
+            new Product { Id = Guid.NewGuid(), Title = "Expensive Product", Description = "Desc", Slug = "expensive", Price = 2000m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            MaxPrice = 500m
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(p => p.Price == 50m);
+        result.Should().Contain(p => p.Price == 500m);
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenFilterByPriceRange_ReturnsMatchingProducts()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Product 1", Description = "Desc", Slug = "p1", Price = 50m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 2", Description = "Desc", Slug = "p2", Price = 150m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 3", Description = "Desc", Slug = "p3", Price = 500m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 4", Description = "Desc", Slug = "p4", Price = 2000m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            MinPrice = 100m,
+            MaxPrice = 1000m
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(p => p.Price == 150m);
+        result.Should().Contain(p => p.Price == 500m);
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenMultipleFilters_ReturnsMatchingProducts()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Gaming Laptop", Description = "High-end gaming", Slug = "gaming-laptop", Price = 2500m },
+            new Product { Id = Guid.NewGuid(), Title = "Gaming Mouse", Description = "High-end mouse", Slug = "gaming-mouse", Price = 150m },
+            new Product { Id = Guid.NewGuid(), Title = "Office Laptop", Description = "Budget laptop", Slug = "office-laptop", Price = 800m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            Title = "gaming",
+            Description = "high-end",
+            MinPrice = 1000m
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Title.Should().Be("Gaming Laptop");
+    }
+
+    [Fact]
+    public async Task SearchAsync_WhenNoMatches_ReturnsEmptyList()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Product 1", Description = "Desc", Slug = "p1", Price = 100m },
+            new Product { Id = Guid.NewGuid(), Title = "Product 2", Description = "Desc", Slug = "p2", Price = 200m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            Title = "NonExistent"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SearchAsync_ReturnsOrderedByTitle()
+    {
+        // Arrange
+        var context = CreateInMemoryContext();
+        var repository = new ProductRepository(context);
+        var products = new[]
+        {
+            new Product { Id = Guid.NewGuid(), Title = "Zebra Product", Description = "Desc", Slug = "zebra", Price = 100m },
+            new Product { Id = Guid.NewGuid(), Title = "Alpha Product", Description = "Desc", Slug = "alpha", Price = 200m },
+            new Product { Id = Guid.NewGuid(), Title = "Beta Product", Description = "Desc", Slug = "beta", Price = 300m }
+        };
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+
+        var request = new BugStore.Application.UseCases.Products.Search.SearchProductsRequest
+        {
+            Description = "desc"
+        };
+
+        // Act
+        var result = await repository.SearchAsync(request);
+
+        // Assert
+        result.Should().HaveCount(3);
+        result[0].Title.Should().Be("Alpha Product");
+        result[1].Title.Should().Be("Beta Product");
+        result[2].Title.Should().Be("Zebra Product");
+    }
 }
